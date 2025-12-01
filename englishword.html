@@ -3,213 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>키즈 잉글리시 어드벤처! 🌟</title>
+    <title>키즈 잉글리시 게임</title>
     <style>
-        /* [스타일 시트 - 디자인 영역] */
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
-
-        :root {
-            --primary-color: #FFB300;
-            --secondary-color: #4FC3F7;
-            --accent-color: #FF7043;
-            --bg-color: #E0F7FA;
-            --text-color: #37474F;
-        }
 
         body {
             font-family: 'Jua', sans-serif;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(#ffffff 20%, transparent 20%), radial-gradient(#ffffff 20%, transparent 20%);
-            background-size: 50px 50px;
-            background-position: 0 0, 25px 25px;
+            background-color: #E0F7FA;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: var(--text-color);
-            overflow: hidden;
+            text-align: center;
+            user-select: none; /* 드래그 방지 */
         }
 
         .container {
             background: white;
             width: 90%;
-            max-width: 500px;
-            border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 450px;
+            border-radius: 20px;
             padding: 20px;
-            text-align: center;
-            position: relative;
-            border: 5px solid var(--primary-color);
-            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 5px solid #FFB300;
         }
 
-        h1 {
-            color: var(--accent-color);
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 0px #FFCCBC;
-        }
+        /* 화면 전환용 */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.5s; }
 
-        /* 상단 상태바 */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            background: #FFF3E0;
-            padding: 10px 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .score-box { color: var(--accent-color); }
-        .rank-box { color: var(--secondary-color); }
+        h1 { color: #FF7043; margin-bottom: 30px; }
+        h2 { color: #0288D1; }
 
-        /* 화면 전환용 클래스 */
-        .screen { display: none; animation: fadeIn 0.5s; }
-        .screen.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 버튼 스타일 */
         .btn {
-            background-color: var(--primary-color);
+            background-color: #FFB300;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Jua', sans-serif;
-            margin: 10px;
-            box-shadow: 0 5px 0 #F57F17;
-            transition: transform 0.1s;
-            width: 80%;
-        }
-
-        .btn:active {
-            transform: translateY(5px);
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            box-shadow: 0 5px 0 #0288D1;
-        }
-
-        .btn-danger {
-            background-color: var(--accent-color);
-            box-shadow: 0 5px 0 #D84315;
-        }
-
-        /* 게임 1: 퀴즈 스타일 */
-        .word-display {
-            font-size: 3rem;
-            color: var(--secondary-color);
-            margin: 20px 0;
-            animation: bounce 1s infinite alternate;
-        }
-
-        .quiz-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .quiz-btn {
-            background: white;
-            border: 3px solid var(--secondary-color);
-            color: var(--text-color);
             padding: 15px;
+            width: 100%;
+            font-size: 1.3rem;
             border-radius: 15px;
-            font-size: 1.2rem;
+            margin: 10px 0;
             cursor: pointer;
             font-family: 'Jua', sans-serif;
+            box-shadow: 0 4px 0 #F57F17;
         }
-        .quiz-btn:hover { background: #E1F5FE; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-blue { background-color: #4FC3F7; box-shadow: 0 4px 0 #0288D1; }
+        .btn-red { background-color: #FF7043; box-shadow: 0 4px 0 #D84315; margin-top: 20px;}
 
-        /* 게임 2: 행맨 스타일 */
-        .letter-container {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+        /* 퀴즈 스타일 */
+        .quiz-word { font-size: 2.5rem; color: #4FC3F7; margin: 20px 0; font-weight: bold; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .opt-btn {
+            background: white; border: 2px solid #ddd; padding: 15px;
+            border-radius: 10px; cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1.1rem;
         }
-        
-        .letter-box {
-            width: 40px;
-            height: 40px;
-            border-bottom: 3px solid var(--text-color);
-            font-size: 2rem;
-            text-transform: uppercase;
-        }
+        .opt-btn:hover { background: #E1F5FE; }
 
-        .keyboard {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .key {
-            background: #EEE;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-family: 'Jua', sans-serif;
-        }
-        .key.disabled { opacity: 0.3; cursor: not-allowed; }
-
+        /* 행맨 스타일 */
         .lives { font-size: 1.5rem; margin-bottom: 10px; }
-
-        /* 배지 시스템 */
-        .badge-container {
-            margin-top: 30px;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 15px;
+        .letters { font-size: 2rem; letter-spacing: 5px; margin: 20px 0; font-weight: bold; color: #333; }
+        .keyboard { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .key {
+            width: 30px; height: 30px; background: #eee; border: none; border-radius: 5px;
+            cursor: pointer; font-weight: bold;
         }
-        .badge-list {
-            display: flex;
-            justify-content: space-around;
-            font-size: 2rem;
-        }
-        .badge { filter: grayscale(100%); opacity: 0.5; transition: 0.5s; }
-        .badge.unlocked { filter: grayscale(0%); opacity: 1; transform: scale(1.2); }
+        .key:disabled { opacity: 0.3; }
 
-        /* 애니메이션 */
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-        .shake { animation: shake 0.4s; }
-
+        /* 점수판 */
+        .status { background: #FFF3E0; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; color: #FF6F00;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="status-bar">
-        <span class="score-box">⭐ 점수: <span id="score">0</span></span>
-        <span class="rank-box">🌱 레벨: <span id="rank">새싹</span></span>
+    <div class="status">
+        ⭐ 점수: <span id="score">0</span> | 🏅 레벨: <span id="level">새싹</span>
     </div>
 
-    <div id="menu-screen" class="screen active">
+    <div id="screen-menu" class="screen active">
+        <h1>🎈 영어 놀이터</h1>
+        <p>어떤 게임을 할까요?</p>
+        <button class="btn" onclick="window.startGame('quiz')">📝 단어 퀴즈</button>
+        <button class="btn btn-blue" onclick="window.startGame('hangman')">🔤 스펠링 맞추기</button>
+    </div>
+
+    <div id="screen-quiz" class="screen">
+        <h2>뜻을 맞춰보세요!</h2>
+        <div class="quiz-word" id="quiz-text">Apple</div>
+        <div class="options" id="quiz-options"></div>
+        <button class="btn btn-red" onclick="window.goHome()">🏠 홈으로</button>
+    </div>
+
+    <div id="screen-hangman" class="screen">
+        <h2>빈칸 채우기</h2>
+        <div class="lives" id="hm-lives">❤️❤️❤️❤️❤️</div>
+        <div id="hm-hint" style="color:#888;">힌트: 사과</div>
+        <div class="letters" id="hm-word">_ _ _ _ _</div>
+        <div class="keyboard" id="hm-keyboard"></div>
+        <button class="btn btn-red" onclick="window.goHome()">🏠 홈으로</button>
+    </div>
+</div>
+
+<script>
+    // [자바스크립트 영역]
+    
+    // 데이터 (수정 가능)
+    const words = [
+        { en: "APPLE", ko: "사과" },
+        { en: "BANANA", ko: "바나나" },
+        { en: "SCHOOL", ko: "학교" },
+        { en: "CAT", ko: "고양이" },
+        { en: "DOG", ko: "강아지" },
+        { en: "HAPPY", ko: "행복한" },
+        { en: "BOOK", ko: "책" },
+        { en: "SUMMER", ko: "여름" }
+    ];
+
+    let score = 0;
+    let currentQuiz = null;
+    let hangmanTarget = "";
+    let hangmanLives = 5;
+    let guessed = [];
+
+    // 전역 함수로 선언 (HTML 버튼이 찾을 수 있게 window에 할당)
+    window.startGame = function(mode) {
+        if(mode === 'quiz') {
+            showScreen('screen-quiz');
+            initQuiz();
+        } else if(mode === 'hangman') {
+            showScreen('screen-hangman');
+            initHangman();
+        }
+    };
+
+    window.goHome = function() {
+        showScreen('screen-menu');
+    };
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function updateScore(pt) {
+        score += pt;
+        if(score < 0) score = 0;
+        document.getElementById('score').innerText = score;
         
-        <h1>English Adventure</h1>
-        <p>재미있는 게임을 선택해봐!</p>
-        <button class="btn" onclick="startGame('quiz')">📝 뜻 맞추기 퀴즈</button>
-        <button class="btn btn-secondary" onclick="startGame('hangman')">🎈 스펠링 구조대</button>
+        let level = "새싹";
+        if(score >= 50) level = "나무";
+        if(score >= 100) level = "마스터";
+        document.getElementById('level').innerText = level;
+    }
+
+    // --- 퀴즈 로직 ---
+    function initQuiz() {
+        currentQuiz = words[Math.floor(Math.random() * words.length)];
+        document.getElementById('quiz-text').innerText = currentQuiz.en;
         
-        <div class="badge
+        // 보기 생성
+        let opts = [currentQuiz.ko];
+        while(opts.length < 4) {
+            let rnd = words[Math.floor(Math.random() * words.length)].ko;
+            if(!opts.includes(rnd)) opts.push(rnd);
+        }
+        opts.sort(() => Math.random() - 0.5);
+
+        const container = document.getElementById('quiz-options');
+        container.innerHTML = '';
+        opts.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = opt;
+            btn.onclick = function() { checkQuiz(opt); };
+            container.appendChild(btn);
+        });
+    }
+
+    function checkQuiz(ans) {
+        if(ans === currentQuiz.ko) {
+            alert("정답입니다! 🎉 (+10점)");
+            updateScore(10);
+            initQuiz();
+        } else {
+            alert("틀렸어요 ㅠㅠ (-5점)");
+            updateScore(-5);
+        }
+    }
+
+    // --- 행맨 로직 ---
+    function initHangman() {
+        let picked = words[Math.floor(Math.random() * words.length)];
+        hangmanTarget = picked.en; // 이미 대문자
+        document.getElementById('hm-hint').innerText = "힌트: " + picked.ko;
+        hangmanLives = 5;
+        guessed = [];
+        
+        renderHangman();
+        renderKeyboard();
+    }
+
+    function renderHangman() {
+        let display = "";
+        let win = true;
+        
+        // 하트
+        let hearts = "";
+        for(let i=0; i<hangmanLives; i++) hearts += "❤️";
+        document.getElementById('hm-lives').innerText = hearts;
+
+        // 글자
+        for(let char of hangmanTarget) {
+            if(guessed.includes(char)) {
+                display += char + " ";
+            } else {
+                display += "_ ";
+                win = false;
+            }
+        }
+        document.getElementById
