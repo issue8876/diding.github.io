@@ -1,365 +1,215 @@
-import React, { useState } from 'react';
-import { Star, Trophy, Award, RefreshCw } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>키즈 잉글리시 어드벤처! 🌟</title>
+    <style>
+        /* [스타일 시트 - 디자인 영역] */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
-const wordBank = [
-  { word: 'APPLE', hint: '빨간색이나 초록색 과일' },
-  { word: 'BANANA', hint: '노란색 길쭉한 과일' },
-  { word: 'CAT', hint: '야옹하는 동물' },
-  { word: 'DOG', hint: '멍멍하는 동물' },
-  { word: 'BOOK', hint: '읽는 것' },
-  { word: 'PENCIL', hint: '쓰고 그리는 도구' },
-  { word: 'SUN', hint: '하늘의 밝은 별' },
-  { word: 'MOON', hint: '밤에 보이는 것' },
-  { word: 'FISH', hint: '물에 사는 동물' },
-  { word: 'BIRD', hint: '하늘을 나는 동물' },
-  { word: 'TREE', hint: '나무' },
-  { word: 'FLOWER', hint: '예쁜 꽃' },
-  { word: 'HOUSE', hint: '사람들이 사는 곳' },
-  { word: 'RABBIT', hint: '깡충깡충 뛰는 동물' }
-];
-
-export default function KidsEnglishGame() {
-  const [gameMode, setGameMode] = useState('menu');
-  const [score, setScore] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [stars, setStars] = useState(0);
-  const [currentWord, setCurrentWord] = useState(wordBank[0]);
-  const [guessedLetters, setGuessedLetters] = useState([]);
-  const [wrongGuesses, setWrongGuesses] = useState(0);
-  const [showHint, setShowHint] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [lastResult, setLastResult] = useState({ won: false, points: 0 });
-  const [selectedCards, setSelectedCards] = useState([]);
-  const [matchedCards, setMatchedCards] = useState([]);
-  const [attempts, setAttempts] = useState(0);
-  const [cardData, setCardData] = useState([]);
-
-  const startGame = (mode) => {
-    const randomWord = wordBank[Math.floor(Math.random() * wordBank.length)];
-    setGameMode(mode);
-    setCurrentWord(randomWord);
-    setGuessedLetters([]);
-    setWrongGuesses(0);
-    setShowHint(false);
-    setShowResult(false);
-    setSelectedCards([]);
-    setMatchedCards([]);
-    setAttempts(0);
-  };
-
-  const handleGameEnd = (won, points) => {
-    setLastResult({ won, points });
-    setShowResult(true);
-    if (won) {
-      setScore(score + points);
-      const newStars = stars + 1;
-      setStars(newStars);
-      if (newStars % 5 === 0) {
-        setLevel(level + 1);
-      }
-    }
-  };
-
-  const nextRound = () => {
-    const randomWord = wordBank[Math.floor(Math.random() * wordBank.length)];
-    setCurrentWord(randomWord);
-    setGuessedLetters([]);
-    setWrongGuesses(0);
-    setShowHint(false);
-    setShowResult(false);
-    setSelectedCards([]);
-    setMatchedCards([]);
-    setAttempts(0);
-  };
-
-  const HangmanGame = () => {
-    const word = currentWord.word;
-    const displayWord = word.split('').map(letter => 
-      guessedLetters.includes(letter) ? letter : '_'
-    ).join(' ');
-
-    const handleGuess = (letter) => {
-      if (guessedLetters.includes(letter)) return;
-      
-      const newGuessed = [...guessedLetters, letter];
-      setGuessedLetters(newGuessed);
-      
-      if (!word.includes(letter)) {
-        const newWrong = wrongGuesses + 1;
-        setWrongGuesses(newWrong);
-        if (newWrong >= 6) {
-          setTimeout(() => handleGameEnd(false, 0), 500);
+        :root {
+            --primary-color: #FFB300;
+            --secondary-color: #4FC3F7;
+            --accent-color: #FF7043;
+            --bg-color: #E0F7FA;
+            --text-color: #37474F;
         }
-      } else {
-        const isComplete = word.split('').every(l => newGuessed.includes(l));
-        if (isComplete) {
-          const points = Math.max(100 - (wrongGuesses * 15) - (newGuessed.length * 2), 10);
-          setTimeout(() => handleGameEnd(true, points), 500);
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#ffffff 20%, transparent 20%), radial-gradient(#ffffff 20%, transparent 20%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            overflow: hidden;
         }
-      }
-    };
 
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        .container {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border: 5px solid var(--primary-color);
+            overflow: hidden;
+        }
 
-    return (
-      <div className="text-center space-y-6">
-        <div className="text-6xl mb-4">🎈</div>
-        <div className="text-lg text-purple-600 mb-2">힌트: {currentWord.hint}</div>
-        <div className="text-4xl font-bold text-gray-800 tracking-wider mb-4 font-mono">{displayWord}</div>
-        <div className="text-xl text-red-500 font-bold">실수: {wrongGuesses} / 6</div>
-        <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
-          {alphabet.map(letter => (
-            <button
-              key={letter}
-              onClick={() => handleGuess(letter)}
-              disabled={guessedLetters.includes(letter)}
-              className={`w-12 h-12 rounded-lg font-bold text-lg transition-all ${
-                guessedLetters.includes(letter)
-                  ? word.includes(letter)
-                    ? 'bg-green-400 text-white'
-                    : 'bg-red-400 text-white'
-                  : 'bg-gradient-to-br from-yellow-200 to-yellow-300 hover:from-yellow-300 hover:to-yellow-400 text-gray-800'
-              }`}
-            >
-              {letter}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #FFCCBC;
+        }
 
-  const SpellingGame = () => {
-    const [input, setInput] = useState('');
+        /* 상단 상태바 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #FFF3E0;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
 
-    const handleSubmit = () => {
-      if (input.toUpperCase() === currentWord.word) {
-        const points = showHint ? 80 : 150;
-        handleGameEnd(true, points);
-      } else {
-        setInput('');
-        setShowHint(true);
-      }
-    };
+        .score-box { color: var(--accent-color); }
+        .rank-box { color: var(--secondary-color); }
 
-    return (
-      <div className="text-center space-y-6">
-        <div className="text-6xl mb-4">✏️</div>
-        <div className="text-2xl font-bold text-purple-700 mb-4">이 단어를 영어로 써보세요!</div>
-        <div className="text-xl text-gray-700 mb-2">힌트: {currentWord.hint}</div>
-        {showHint && (
-          <div className="text-lg text-orange-600 font-bold animate-bounce">
-            💡 틀렸어요! 다시 시도해보세요!
-          </div>
-        )}
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-          className="text-3xl font-bold text-center border-4 border-purple-300 rounded-xl p-4 w-64 focus:outline-none focus:border-purple-500 uppercase"
-          placeholder="단어 입력"
-          autoFocus
-        />
-        <br />
-        <button
-          onClick={handleSubmit}
-          className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-8 py-4 rounded-xl text-xl font-bold hover:from-green-500 hover:to-blue-500"
-        >
-          확인하기 ✓
-        </button>
-      </div>
-    );
-  };
+        /* 화면 전환용 클래스 */
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .screen.active { display: block; }
 
-  const MatchingGame = () => {
-    const gameWords = wordBank.slice(0, 4);
-    
-    if (cardData.length === 0) {
-      const cards = [
-        ...gameWords.map((w, i) => ({ id: `word-${i}`, content: w.word, type: 'word', pair: i })),
-        ...gameWords.map((w, i) => ({ id: `hint-${i}`, content: w.hint, type: 'hint', pair: i }))
-      ].sort(() => Math.random() - 0.5);
-      setCardData(cards);
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    const handleClick = (card) => {
-      if (selectedCards.length === 2 || matchedCards.includes(card.id) || selectedCards.includes(card.id)) return;
+        /* 버튼 스타일 */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Jua', sans-serif;
+            margin: 10px;
+            box-shadow: 0 5px 0 #F57F17;
+            transition: transform 0.1s;
+            width: 80%;
+        }
 
-      const newSelected = [...selectedCards, card.id];
-      setSelectedCards(newSelected);
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
 
-      if (newSelected.length === 2) {
-        const newAttempts = attempts + 1;
-        setAttempts(newAttempts);
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            box-shadow: 0 5px 0 #0288D1;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-color);
+            box-shadow: 0 5px 0 #D84315;
+        }
+
+        /* 게임 1: 퀴즈 스타일 */
+        .word-display {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin: 20px 0;
+            animation: bounce 1s infinite alternate;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
         
-        const [first, second] = newSelected.map(id => cardData.find(c => c.id === id));
-        
-        if (first.pair === second.pair && first.type !== second.type) {
-          const newMatched = [...matchedCards, ...newSelected];
-          setMatchedCards(newMatched);
-          setSelectedCards([]);
-          
-          if (newMatched.length === cardData.length) {
-            const points = Math.max(200 - (newAttempts * 10), 50);
-            setTimeout(() => handleGameEnd(true, points), 500);
-          }
-        } else {
-          setTimeout(() => setSelectedCards([]), 800);
+        .quiz-btn {
+            background: white;
+            border: 3px solid var(--secondary-color);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'Jua', sans-serif;
         }
-      }
-    };
+        .quiz-btn:hover { background: #E1F5FE; }
 
-    return (
-      <div className="text-center space-y-6">
-        <div className="text-6xl mb-4">🎯</div>
-        <div className="text-xl font-bold text-purple-700">영어 단어와 뜻을 연결하세요!</div>
-        <div className="text-lg text-gray-600 mt-2">시도 횟수: {attempts}</div>
-        <div className="grid grid-cols-4 gap-3 max-w-3xl mx-auto">
-          {cardData.map(card => (
-            <button
-              key={card.id}
-              onClick={() => handleClick(card)}
-              className={`p-4 rounded-xl font-bold text-sm h-24 transition-all ${
-                matchedCards.includes(card.id)
-                  ? 'bg-gradient-to-br from-green-300 to-green-400 text-white'
-                  : selectedCards.includes(card.id)
-                  ? 'bg-gradient-to-br from-blue-300 to-blue-400 text-white'
-                  : 'bg-gradient-to-br from-pink-200 to-purple-200 text-gray-800 hover:from-pink-300 hover:to-purple-300'
-              }`}
-            >
-              {card.content}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
+        /* 게임 2: 행맨 스타일 */
+        .letter-container {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .letter-box {
+            width: 40px;
+            height: 40px;
+            border-bottom: 3px solid var(--text-color);
+            font-size: 2rem;
+            text-transform: uppercase;
+        }
 
-  if (gameMode === 'menu') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-bounce">
-            <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
-              🌟 영어 단어 게임 🌟
-            </h1>
-            <p className="text-2xl text-gray-700">재미있게 영어를 배워요!</p>
-          </div>
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
 
-          <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-            <div className="flex justify-around text-center mb-8 flex-wrap gap-4">
-              <div className="bg-gradient-to-br from-yellow-200 to-yellow-300 rounded-2xl p-6 shadow-lg">
-                <Trophy className="mx-auto mb-2 text-yellow-600" size={40} />
-                <div className="text-3xl font-bold text-yellow-700">{score}</div>
-                <div className="text-sm text-gray-600">점수</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-200 to-purple-300 rounded-2xl p-6 shadow-lg">
-                <Award className="mx-auto mb-2 text-purple-600" size={40} />
-                <div className="text-3xl font-bold text-purple-700">{level}</div>
-                <div className="text-sm text-gray-600">레벨</div>
-              </div>
-              <div className="bg-gradient-to-br from-pink-200 to-pink-300 rounded-2xl p-6 shadow-lg">
-                <Star className="mx-auto mb-2 text-pink-600" size={40} />
-                <div className="text-3xl font-bold text-pink-700">{stars}</div>
-                <div className="text-sm text-gray-600">별</div>
-              </div>
-            </div>
+        .key {
+            background: #EEE;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Jua', sans-serif;
+        }
+        .key.disabled { opacity: 0.3; cursor: not-allowed; }
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <button
-                onClick={() => startGame('hangman')}
-                className="bg-gradient-to-br from-blue-300 to-blue-400 hover:from-blue-400 hover:to-blue-500 text-white rounded-2xl p-8"
-              >
-                <div className="text-6xl mb-4">🎈</div>
-                <div className="text-2xl font-bold">행맨 게임</div>
-                <div className="text-sm mt-2">글자를 맞춰보세요!</div>
-              </button>
+        .lives { font-size: 1.5rem; margin-bottom: 10px; }
 
-              <button
-                onClick={() => startGame('spelling')}
-                className="bg-gradient-to-br from-green-300 to-green-400 hover:from-green-400 hover:to-green-500 text-white rounded-2xl p-8"
-              >
-                <div className="text-6xl mb-4">✏️</div>
-                <div className="text-2xl font-bold">스펠링 게임</div>
-                <div className="text-sm mt-2">단어를 써보세요!</div>
-              </button>
+        /* 배지 시스템 */
+        .badge-container {
+            margin-top: 30px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 15px;
+        }
+        .badge-list {
+            display: flex;
+            justify-content: space-around;
+            font-size: 2rem;
+        }
+        .badge { filter: grayscale(100%); opacity: 0.5; transition: 0.5s; }
+        .badge.unlocked { filter: grayscale(0%); opacity: 1; transform: scale(1.2); }
 
-              <button
-                onClick={() => startGame('matching')}
-                className="bg-gradient-to-br from-pink-300 to-pink-400 hover:from-pink-400 hover:to-pink-500 text-white rounded-2xl p-8"
-              >
-                <div className="text-6xl mb-4">🎯</div>
-                <div className="text-2xl font-bold">매칭 게임</div>
-                <div className="text-sm mt-2">짝을 찾아보세요!</div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        /* 애니메이션 */
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.4s; }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
-          <button
-            onClick={() => setGameMode('menu')}
-            className="bg-white text-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-100"
-          >
-            ← 메뉴로
-          </button>
-          <div className="flex gap-4">
-            <div className="bg-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2">
-              <Trophy className="text-yellow-500" size={24} />
-              {score}
-            </div>
-            <div className="bg-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2">
-              <Star className="text-pink-500" size={24} />
-              {stars}
-            </div>
-          </div>
-        </div>
+    </style>
+</head>
+<body>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          {showResult ? (
-            <div className="text-center space-y-6 py-12">
-              <div className="text-8xl mb-4">{lastResult.won ? '🎉' : '😢'}</div>
-              <div className="text-4xl font-bold text-gray-800 mb-4">
-                {lastResult.won ? '정답이에요!' : '아쉬워요!'}
-              </div>
-              {lastResult.won && (
-                <div className="text-2xl text-purple-600 font-bold">+{lastResult.points} 점!</div>
-              )}
-              <div className="text-xl text-gray-600 mb-4">
-                정답: <span className="font-bold text-green-600">{currentWord.word}</span>
-              </div>
-              <div className="flex gap-4 justify-center flex-wrap">
-                <button
-                  onClick={nextRound}
-                  className="bg-gradient-to-r from-green-400 to-blue-400 text-white px-8 py-4 rounded-xl text-xl font-bold hover:from-green-500 hover:to-blue-500 flex items-center gap-2"
-                >
-                  <RefreshCw size={24} />
-                  다음 문제
-                </button>
-                <button
-                  onClick={() => setGameMode('menu')}
-                  className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-8 py-4 rounded-xl text-xl font-bold hover:from-purple-500 hover:to-pink-500"
-                >
-                  메뉴로 가기
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {gameMode === 'hangman' && <HangmanGame />}
-              {gameMode === 'spelling' && <SpellingGame />}
-              {gameMode === 'matching' && <MatchingGame />}
-            </>
-          )}
-        </div>
-      </div>
+<div class="container">
+    <div class="status-bar">
+        <span class="score-box">⭐ 점수: <span id="score">0</span></span>
+        <span class="rank-box">🌱 레벨: <span id="rank">새싹</span></span>
     </div>
-  );
-}
+
+    <div id="menu-screen" class="screen active">
+        
+        <h1>English Adventure</h1>
+        <p>재미있는 게임을 선택해봐!</p>
+        <button class="btn" onclick="startGame('quiz')">📝 뜻 맞추기 퀴즈</button>
+        <button class="btn btn-secondary" onclick="startGame('hangman')">🎈 스펠링 구조대</button>
+        
+        <div class="badge
