@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>혜련의 AI 트레이너 게임</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Custom Game Styles adapted for Glass Theme */
+    .game-container {
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px 20px;
+      border-radius: 16px;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1em;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      text-align: center;
+    }
+
+    .game-area {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+      min-height: 400px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .shape-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .shape-item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .shape-item:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .shape-item.selected {
+      border-color: #a855f7;
+      background: rgba(168, 85, 247, 0.2);
+    }
+
+    .shape-item.correct {
+      border-color: #4caf50;
+      background: rgba(76, 175, 80, 0.2);
+      animation: bounce 0.5s;
+    }
+
+    .shape-item.wrong {
+      border-color: #f44336;
+      background: rgba(244, 67, 54, 0.2);
+      animation: shake 0.5s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-10px);
+      }
+
+      75% {
+        transform: translateX(10px);
+      }
+    }
+
+    .shape {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+
+    .shape-label {
+      font-size: 1em;
+      color: #e2e8f0;
+      font-weight: bold;
+    }
+
+    .training-phase {
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px dashed #ff9800;
+    }
+
+    .training-title {
+      font-size: 1.3em;
+      color: #ffb74d;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .instruction {
+      text-align: center;
+      font-size: 1.2em;
+      color: #e2e8f0;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .progress-bar {
+      background: rgba(255, 255, 255, 0.1);
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
+      height: 100%;
+      transition: width 0.5s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+      color: white;
+    }
+
+    .leaderboard-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px 20px;
+      margin: 10px 0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    /* Overlay & Achievement */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      z-index: 999;
+      backdrop-filter: blur(5px);
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .achievement {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(30, 41, 59, 0.95);
+      padding: 40px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      z-index: 1000;
+      transition: transform 0.3s;
+      color: white;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .achievement.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .achievement-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+    }
+
+    .feedback {
+      min-height: 1.5em;
+      margin: 1rem 0;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .feedback.correct {
+      color: #4ade80;
+    }
+
+    .feedback.wrong {
+      color: #f87171;
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen p-4 pt-20">
+
+  <main class="glass-card p-8 game-container relative z-10">
+    <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 text-center text-glow">
+      🧠 혜련의 AI 트레이너 게임
+    </h1>
+    <p class="text-gray-300 text-center mb-8">AI에게 도형을 가르쳐주고 테스트해보세요!</p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="stat-box">⭐ 점수: <span id="score">0</span></div>
+      <div class="stat-box">🎯 레벨: <span id="level">1</span></div>
+      <div class="stat-box">🏆 최고점수: <span id="highscore">0</span></div>
+      <div class="stat-box">💎 배지: <span id="badges">0</span></div>
+    </div>
+
+    <div class="game-area">
+      <div class="text-xl text-purple-300 font-bold text-center mb-4" id="levelInfo">레벨 1: AI 트레이닝 시작!</div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar" style="width: 0%">
+          <span id="progressText">0/5</span>
+        </div>
+      </div>
+
+      <div id="gameContent"></div>
+
+      <div class="feedback text-center" id="feedback"></div>
+
+      <div class="flex justify-center gap-4 mt-6">
+        <button id="actionBtn" onclick="handleAction()"
+          class="glass-btn px-8 py-3 rounded-full text-white font-bold text-lg">시작하기</button>
+        <button onclick="resetGame()" class="glass-btn px-6 py-3 rounded-full text-gray-300 hover:text-white">다시
+          시작</button>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <div class="text-xl text-indigo-300 font-bold text-center mb-4">🏅 나의 기록</div>
+      <div id="leaderboardContent"></div>
+    </div>
+  </main>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="achievement" id="achievement">
+    <div class="achievement-icon">🎉</div>
+    <h2 id="achievementTitle" class="text-2xl font-bold mb-2"></h2>
+    <p id="achievementText" class="text-gray-300 mb-6"></p>
+    <button onclick="closeAchievement()" class="glass-btn px-6 py-2 rounded-full text-white">확인</button>
+  </div>
+
+  <script src="../js/common.js"></script>
+  <script>
+    let gameState = {
+      phase: 'intro',
+      level: 1,
+      score: 0,
+      highscore: 0,
+      badges: 0,
+      trainingData: [],
+      currentQuestion: null,
+      correctAnswers: 0,
+      totalQuestions: 5,
+      selectedShape: null
+    };
+
+    const shapes = [
+      { emoji: '🔴', name: '동그라미', category: 'round' },
+      { emoji: '🔵', name: '동그라미', category: 'round' },
+      { emoji: '⭐', name: '별', category: 'star' },
+      { emoji: '✨', name: '별', category: 'star' },
+      { emoji: '🟦', name: '네모', category: 'square' },
+      { emoji: '🟨', name: '네모', category: 'square' },
+      { emoji: '🔺', name: '세모', category: 'triangle' },
+      { emoji: '🔻', name: '세모', category: 'triangle' }
+    ];
+
+    function init() {
+      const saved = localStorage.getItem('aiTrainerGame');
+      if (saved) {
+        const data = JSON.parse(saved);
+        gameState.highscore = data.highscore || 0;
+        gameState.badges = data.badges || 0;
+      }
+      updateStats();
+      updateLeaderboard();
+      showIntro();
+    }
+
+    function showIntro() {
+      document.getElementById('gameContent').innerHTML = `
+        <div class="training-phase">
+          <div class="training-title">🎓 딥러닝이란?</div>
+          <div class="instruction">
+            딥러닝은 AI가 스스로 학습하는 방법이에요!<br><br>
+            <strong>1단계: 학습</strong> - AI에게 예시를 보여줍니다<br>
+            <strong>2단계: 테스트</strong> - AI가 배운 것을 확인합니다<br>
+            <strong>3단계: 개선</strong> - 더 많이 배울수록 더 똑똑해져요!<br><br>
+            시작 버튼을 눌러 AI를 가르쳐보세요! 🚀
+          </div>
+        </div>
+      `;
+      document.getElementById('actionBtn').textContent = '학습 시작!';
+      gameState.phase = 'intro';
+    }
+
+    function startTraining() {
+      gameState.phase = 'training';
+      gameState.trainingData = [];
+      gameState.correctAnswers = 0;
+      updateProgress();
+
+      document.getElementById('levelInfo').textContent =
+        `레벨 ${gameState.level}: AI 학습 단계 (${gameState.trainingData.length}/3)`;
+
+      document.getElementById('gameContent').innerHTML = `
+        <div class="training-phase">
+          <div class="training-title">📚 AI에게 도형 가르치기</div>
+          <div class="instruction">
+            아래 도형 중 하나를 선택하고 이름을 알려주세요!<br>
+            (3개의 예시를 학습시켜야 해요)
+          </div>
+        </div>
+        <div class="shape-grid" id="shapeGrid"></div>
+      `;
+
+      showTrainingShapes();
+      document.getElementById('actionBtn').textContent = '다음 학습';
+      document.getElementById('actionBtn').disabled = true;
+      document.getElementById('actionBtn').classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    function showTrainingShapes() {
+      const grid = document.getElementById('shapeGrid');
+      const levelShapes = shapes.slice(0, Math.min(4 + gameState.level, 8));
+
+      grid.innerHTML = levelShapes.map((shape, idx) => `
+        <div class="shape-item" onclick="selectTrainingShape(${idx})">
+          <div class="shape">${shape.emoji}</div>
+          <div class="shape-label">${shape.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectTrainingShape(idx) {
+      const levelShapes = shapes.slice(0, Math.min(4 + gameState.level, 8));
+      gameState.selectedShape = levelShapes[idx];
+
+      document.querySelectorAll('.shape-item').forEach((item, i) => {
+        item.classList.toggle('selected', i === idx);
+      });
+
+      if (gameState.trainingData.length < 3) {
+        gameState.trainingData.push(gameState.selectedShape);
+        document.getElementById('levelInfo').textContent =
+          `레벨 ${gameState.level}: AI 학습 단계 (${gameState.trainingData.length}/3)`;
+
+        document.getElementById('feedback').textContent =
+          `✅ AI가 "${gameState.selectedShape.name}"를 학습했어요!`;
+        document.getElementById('feedback').className = 'feedback correct';
+
+        if (gameState.trainingData.length === 3) {
+          const btn = document.getElementById('actionBtn');
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.textContent = '테스트 시작!';
+        } else {
+          setTimeout(() => {
+            document.querySelectorAll('.shape-item').forEach(item => {
+              item.classList.remove('selected');
+            });
+            document.getElementById('feedback').textContent = '';
+          }, 1000);
+        }
+      }
+    }
+
+    function startTesting() {
+      gameState.phase = 'testing';
+      gameState.correctAnswers = 0;
+      updateProgress();
+      askQuestion();
+    }
+
+    function askQuestion() {
+      if (gameState.correctAnswers >= gameState.totalQuestions) {
+        completeLevel();
+        return;
+      }
+
+      const trainedShape = gameState.trainingData[
+        Math.floor(Math.random() * gameState.trainingData.length)
+      ];
+
+      const allSameCategory = shapes.filter(s => s.category === trainedShape.category);
+      gameState.currentQuestion = allSameCategory[
+        Math.floor(Math.random() * allSameCategory.length)
+      ];
+
+      const options = generateOptions(gameState.currentQuestion);
+
+      document.getElementById('levelInfo').textContent =
+        `레벨 ${gameState.level}: AI 테스트 중! (${gameState.correctAnswers}/${gameState.totalQuestions})`;
+
+      document.getElementById('gameContent').innerHTML = `
+        <div class="instruction">
+          🤖 AI가 배운 내용을 테스트해요!<br>
+          이 도형은 무엇일까요? <span style="font-size: 2em">${gameState.currentQuestion.emoji}</span>
+        </div>
+        <div class="shape-grid" id="answerGrid"></div>
+      `;
+
+      const grid = document.getElementById('answerGrid');
+      grid.innerHTML = options.map((option, idx) => `
+        <div class="shape-item" onclick="checkAnswer('${option}')">
+          <div class="shape-label">${option}</div>
+        </div>
+      `).join('');
+
+      const btn = document.getElementById('actionBtn');
+      btn.textContent = '다음 문제';
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    function generateOptions(correct) {
+      const allNames = [...new Set(shapes.map(s => s.name))];
+      const options = [correct.name];
+
+      while (options.length < Math.min(4, allNames.length)) {
+        const random = allNames[Math.floor(Math.random() * allNames.length)];
+        if (!options.includes(random)) {
+          options.push(random);
+        }
+      }
+
+      return options.sort(() => Math.random() - 0.5);
+    }
+
+    function checkAnswer(answer) {
+      const correct = answer === gameState.currentQuestion.name;
+
+      document.querySelectorAll('#answerGrid .shape-item').forEach(item => {
+        if (item.textContent.trim() === answer) {
+          item.classList.add(correct ? 'correct' : 'wrong');
+        }
+        item.onclick = null;
+      });
+
+      if (correct) {
+        gameState.correctAnswers++;
+        gameState.score += 10 * gameState.level;
+        document.getElementById('feedback').textContent =
+          `🎉 정답! AI가 올바르게 학습했어요! (+${10 * gameState.level}점)`;
+        document.getElementById('feedback').className = 'feedback correct';
+      } else {
+        document.getElementById('feedback').textContent =
+          `❌ 틀렸어요! 정답은 "${gameState.currentQuestion.name}"였어요.`;
+        document.getElementById('feedback').className = 'feedback wrong';
+      }
+
+      updateStats();
+      updateProgress();
+
+      const btn = document.getElementById('actionBtn');
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    function completeLevel() {
+      const accuracy = (gameState.correctAnswers / gameState.totalQuestions) * 100;
+      let bonus = 0;
+
+      if (accuracy === 100) {
+        bonus = 50 * gameState.level;
+        gameState.badges++;
+        showAchievement('🏆 완벽해요!',
+          `레벨 ${gameState.level}을 완벽하게 클리어했어요!<br>보너스: ${bonus}점, 배지 획득!`);
+      } else if (accuracy >= 80) {
+        bonus = 30 * gameState.level;
+        showAchievement('⭐ 훌륭해요!',
+          `레벨 ${gameState.level}을 클리어했어요!<br>보너스: ${bonus}점`);
+      }
+
+      gameState.score += bonus;
+      gameState.level++;
+
+      if (gameState.score > gameState.highscore) {
+        gameState.highscore = gameState.score;
+      }
+
+      saveGame();
+      updateStats();
+      updateLeaderboard();
+
+      document.getElementById('levelInfo').textContent =
+        `🎊 레벨 ${gameState.level - 1} 완료!`;
+
+      document.getElementById('gameContent').innerHTML = `
+        <div class="instruction">
+          정답률: ${accuracy.toFixed(0)}%<br>
+          획득 점수: ${gameState.score}점<br><br>
+          ${gameState.level <= 5 ? '다음 레벨에 도전해보세요!' : '모든 레벨을 클리어했어요! 🎉'}
+        </div>
+      `;
+
+      document.getElementById('feedback').textContent = '';
+      const btn = document.getElementById('actionBtn');
+      btn.textContent = gameState.level <= 5 ? '다음 레벨!' : '처음부터 다시!';
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      gameState.phase = 'complete';
+    }
+
+    function handleAction() {
+      if (gameState.phase === 'intro' || gameState.phase === 'complete') {
+        if (gameState.level > 5) {
+          resetGame();
+        } else {
+          startTraining();
+        }
+      } else if (gameState.phase === 'training') {
+        startTesting();
+      } else if (gameState.phase === 'testing') {
+        askQuestion();
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('score').textContent = gameState.score;
+      document.getElementById('level').textContent = gameState.level;
+      document.getElementById('highscore').textContent = gameState.highscore;
+      document.getElementById('badges').textContent = gameState.badges;
+    }
+
+    function updateProgress() {
+      const progress = (gameState.correctAnswers / gameState.totalQuestions) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      document.getElementById('progressText').textContent =
+        `${gameState.correctAnswers}/${gameState.totalQuestions}`;
+    }
+
+    function showAchievement(title, text) {
+      document.getElementById('achievementTitle').textContent = title;
+      document.getElementById('achievementText').innerHTML = text;
+      document.getElementById('overlay').classList.add('show');
+      document.getElementById('achievement').classList.add('show');
+    }
+
+    function closeAchievement() {
+      document.getElementById('overlay').classList.remove('show');
+      document.getElementById('achievement').classList.remove('show');
+    }
+
+    function saveGame() {
+      localStorage.setItem('aiTrainerGame', JSON.stringify({
+        highscore: gameState.highscore,
+        badges: gameState.badges
+      }));
+    }
+
+    function updateLeaderboard() {
+      const content = document.getElementById('leaderboardContent');
+      content.innerHTML = `
+        <div class="leaderboard-item">
+          <span><span class="mr-2">🥇</span>최고 점수</span>
+          <span><strong>${gameState.highscore}</strong>점</span>
+        </div>
+        <div class="leaderboard-item">
+          <span><span class="mr-2">🏅</span>획득 배지</span>
+          <span><strong>${gameState.badges}</strong>개</span>
+        </div>
+        <div class="leaderboard-item">
+          <span><span class="mr-2">📊</span>현재 점수</span>
+          <span><strong>${gameState.score}</strong>점</span>
+        </div>
+      `;
+    }
+
+    function resetGame() {
+      gameState.level = 1;
+      gameState.score = 0;
+      gameState.correctAnswers = 0;
+      updateStats();
+      updateProgress();
+      showIntro();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
